@@ -1,7 +1,7 @@
 import textwrap
 from abc import ABC, abstractclassmethod, abstractproperty
 from datetime import datetime
-from pathlib import Path
+
 
 class ContasIterador:
     def __init__(self, contas):
@@ -126,7 +126,11 @@ class ContaCorrente(Conta):
 
     def sacar(self, valor):
         numero_saques = len(
-            [transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__]
+            [
+                transacao
+                for transacao in self.historico.transacoes
+                if transacao["tipo"] == Saque.__name__
+            ]
         )
 
         excedeu_limite = valor > self._limite
@@ -173,14 +177,19 @@ class Historico:
 
     def gerar_relatorio(self, tipo_transacao=None):
         for transacao in self._transacoes:
-            if tipo_transacao is None or transacao["tipo"].lower() == tipo_transacao.lower():
+            if (
+                tipo_transacao is None
+                or transacao["tipo"].lower() == tipo_transacao.lower()
+            ):
                 yield transacao
 
     def transacoes_do_dia(self):
         data_atual = datetime.utcnow().date()
         transacoes = []
         for transacao in self._transacoes:
-            data_transacao = datetime.strptime(transacao["data"], "%d-%m-%Y %H:%M:%S").date()
+            data_transacao = datetime.strptime(
+                transacao["data"], "%d-%m-%Y %H:%M:%S"
+            ).date()
             if data_atual == data_transacao:
                 transacoes.append(transacao)
         return transacoes
@@ -231,9 +240,11 @@ def log_transacao(func):
     def envelope(*args, **kwargs):
         resultado = func(*args, **kwargs)
         data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        try: 
-            with open('log.txt', 'a') as arquivo:
-                arquivo.write(f"[{data_hora}] | Função '{func.__name__}' executada com argumentos {args} e {kwargs}. Retornou {resultado}\n")
+        try:
+            with open("log.txt", "a") as arquivo:
+                arquivo.write(
+                    f"[{data_hora}] | Função '{func.__name__}' executada com argumentos {args} e {kwargs}. Retornou {resultado}\n"
+                )
         except FileExistsError as exc:
             print("O arquivo 'log.txt' não foi encontrado.")
             print(exc)
@@ -241,14 +252,16 @@ def log_transacao(func):
             print("Você não tem permissão para alterar o arquivo: log.txt")
             print(exc)
         except IsADirectoryError as exc:
-            print("Não foi possível abrir o arquivo. O arquivo em questão é um diretório.")
+            print(
+                "Não foi possível abrir o arquivo. O arquivo em questão é um diretório."
+            )
             print(exc)
         except Exception as exc:
             print("Não foi possível abrir o arquivo.")
             print(exc)
         finally:
-            arquivo.close()    
-        
+            arquivo.close()
+
         print(f"{data_hora}: {func.__name__.upper()}")
         return resultado
 
@@ -360,9 +373,13 @@ def criar_cliente(clientes):
 
     nome = input("Informe o nome completo: ")
     data_nascimento = input("Informe a data de nascimento (dd-mm-aaaa): ")
-    endereco = input("Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): ")
+    endereco = input(
+        "Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): "
+    )
 
-    cliente = PessoaFisica(nome=nome, data_nascimento=data_nascimento, cpf=cpf, endereco=endereco)
+    cliente = PessoaFisica(
+        nome=nome, data_nascimento=data_nascimento, cpf=cpf, endereco=endereco
+    )
 
     clientes.append(cliente)
 
@@ -378,7 +395,9 @@ def criar_conta(numero_conta, clientes, contas):
         print("\n@@@ Cliente não encontrado, fluxo de criação de conta encerrado! @@@")
         return
 
-    conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta, limite=500, limite_saques=50)
+    conta = ContaCorrente.nova_conta(
+        cliente=cliente, numero=numero_conta, limite=500, limite_saques=50
+    )
     contas.append(conta)
     cliente.contas.append(conta)
 
@@ -421,7 +440,9 @@ def main():
             break
 
         else:
-            print("\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@")
+            print(
+                "\n@@@ Operação inválida, por favor selecione novamente a operação desejada. @@@"
+            )
 
 
 main()
